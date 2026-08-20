@@ -1,0 +1,59 @@
+{
+  "paper_id": "sample-cbse-physics-001",
+  "answers": [
+    {
+      "q_id": "A1",
+      "answer": [{ "type": "text", "value": "Ampere" }],
+      "explanation": "Electric current is measured in amperes (A) in the SI system."
+    },
+    {
+      "q_id": "A2",
+      "answer": [{ "type": "text", "value": "Energy" }],
+      "explanation": "E represents energy, m is mass, and c is the speed of light in vacuum."
+    },
+    {
+      "q_id": "A3",
+      "answer": [{ "type": "text", "value": "Halves" }],
+      "explanation": "Since λ ∝ 1/p, doubling momentum halves the wavelength."
+    },
+    {
+      "q_id": "B1",
+      "answer": [
+        { "type": "text", "value": "The total electric flux through a closed surface is equal to " },
+        { "type": "equation", "value": "\\frac{1}{\\epsilon_0}" },
+        { "type": "text", "value": " times the net charge enclosed: " },
+        { "type": "equation", "value": "\\oint \\vec{E} \\cdot d\\vec{A} = \\frac{Q_{enc}}{\\epsilon_0}" }
+      ]
+    },
+    {
+      "q_id": "B2",
+      "answer": [
+        { "type": "text", "value": "L = mvr = " },
+        { "type": "equation", "value": "9.1 \\times 10^{-31} \\times 2.2 \\times 10^6 \\times 5.3 \\times 10^{-11}" },
+        { "type": "text", "value": " = 1.06 × 10⁻³⁴ J·s" }
+      ]
+    },
+    {
+      "q_id": "B3",
+      "answer": [
+        { "type": "text", "value": "Photoelectric effect is emission of electrons when light of sufficient frequency strikes a metal surface. KEmax depends on frequency (photon energy), not intensity." }
+      ]
+    },
+    {
+      "q_id": "B4",
+      "answer": [
+        { "type": "text", "value": "Derivation using Biot-Savart law. B = " },
+        { "type": "equation", "value": "\\frac{4\\pi \\times 10^{-7} \\times 100 \\times 2}{2 \\times 0.1}" },
+        { "type": "text", "value": " = 1.26 × 10⁻³ T" }
+      ]
+    },
+    {
+      "q_id": "C1",
+      "answer": [
+        { "type": "text", "value": "(a) Electrons revolve in discrete orbits without radiating energy; angular momentum is quantized: " },
+        { "type": "equation", "value": "mvr = \\frac{nh}{2\\pi}" },
+        { "type": "text", "value": ". (b) Derivation from Coulomb force = centripetal force. (c) E₁ = -13.6 eV." }
+      ]
+    }
+  ]
+}

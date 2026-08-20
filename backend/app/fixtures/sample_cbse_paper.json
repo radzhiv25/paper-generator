@@ -1,0 +1,129 @@
+{
+  "paper_id": "sample-cbse-physics-001",
+  "owner_id": "demo-user",
+  "template_id": "cbse",
+  "metadata": {
+    "subject": "Physics",
+    "grade_class": "Class XII",
+    "total_marks": 50,
+    "duration": "3 hours",
+    "instructions": "All questions are compulsory. Read each question carefully before answering."
+  },
+  "sections": [
+    {
+      "section_id": "A",
+      "instructions": "Answer all questions. Each question carries 1 mark.",
+      "questions": [
+        {
+          "q_id": "A1",
+          "type": "mcq",
+          "content": [
+            { "type": "text", "value": "The SI unit of electric current is:" }
+          ],
+          "options": ["Ampere", "Volt", "Ohm", "Coulomb"],
+          "marks": 1,
+          "difficulty": "easy"
+        },
+        {
+          "q_id": "A2",
+          "type": "mcq",
+          "content": [
+            { "type": "text", "value": "According to Einstein's mass-energy equivalence, " },
+            { "type": "equation", "value": "E = mc^2" },
+            { "type": "text", "value": ", where c is the speed of light. What does E represent?" }
+          ],
+          "options": ["Energy", "Force", "Power", "Momentum"],
+          "marks": 1,
+          "difficulty": "medium"
+        },
+        {
+          "q_id": "A3",
+          "type": "mcq",
+          "content": [
+            { "type": "text", "value": "The de Broglie wavelength of a particle is given by " },
+            { "type": "equation", "value": "\\lambda = \\frac{h}{p}" },
+            { "type": "text", "value": ". If momentum p doubles, the wavelength:" }
+          ],
+          "options": ["Doubles", "Halves", "Remains unchanged", "Quadruples"],
+          "marks": 1,
+          "difficulty": "medium"
+        }
+      ]
+    },
+    {
+      "section_id": "B",
+      "instructions": "Answer any 3 of the following. Each question carries 5 marks.",
+      "questions": [
+        {
+          "q_id": "B1",
+          "type": "short",
+          "content": [
+            { "type": "text", "value": "State Gauss's law in electrostatics and write its mathematical form." }
+          ],
+          "marks": 5,
+          "difficulty": "medium"
+        },
+        {
+          "q_id": "B2",
+          "type": "numerical",
+          "content": [
+            { "type": "text", "value": "An electron moves in a circular orbit of radius " },
+            { "type": "equation", "value": "5.3 \\times 10^{-11}" },
+            { "type": "text", "value": " m with speed " },
+            { "type": "equation", "value": "2.2 \\times 10^6" },
+            { "type": "text", "value": " m/s. Calculate its angular momentum. (Given: mass of electron " },
+            { "type": "equation", "value": "m_e = 9.1 \\times 10^{-31}" },
+            { "type": "text", "value": " kg)" }
+          ],
+          "marks": 5,
+          "difficulty": "hard"
+        },
+        {
+          "q_id": "B3",
+          "type": "short",
+          "content": [
+            { "type": "text", "value": "Explain the photoelectric effect. Why does increasing intensity of light not change the maximum kinetic energy of photoelectrons?" }
+          ],
+          "marks": 5,
+          "difficulty": "medium"
+        },
+        {
+          "q_id": "B4",
+          "type": "long",
+          "content": [
+            { "type": "text", "value": "Derive the expression for the magnetic field at the centre of a circular coil carrying current I. A coil of 100 turns and radius 0.1 m carries a current of 2 A. Calculate the magnetic field at its centre using " },
+            { "type": "equation", "value": "B = \\frac{\\mu_0 n I}{2r}" },
+            { "type": "text", "value": "." }
+          ],
+          "marks": 5,
+          "difficulty": "hard"
+        }
+      ]
+    },
+    {
+      "section_id": "C",
+      "instructions": "Answer the following. This question carries 10 marks.",
+      "questions": [
+        {
+          "q_id": "C1",
+          "type": "long",
+          "content": [
+            { "type": "text", "value": "(a) State and explain Bohr's postulates for the hydrogen atom. " },
+            { "type": "text", "value": "(b) Using Bohr's model, derive the expression for the radius of the nth orbit: " },
+            { "type": "equation", "value": "r_n = \\frac{n^2 h^2}{4\\pi^2 m k e^2}" },
+            { "type": "text", "value": ". " },
+            { "type": "text", "value": "(c) Calculate the energy of the electron in the ground state of hydrogen. (Given: " },
+            { "type": "equation", "value": "k = 9 \\times 10^9" },
+            { "type": "text", "value": " N m²/C², " },
+            { "type": "equation", "value": "e = 1.6 \\times 10^{-19}" },
+            { "type": "text", "value": " C)" }
+          ],
+          "marks": 10,
+          "difficulty": "hard"
+        }
+      ]
+    }
+  ],
+  "created_at": "2026-07-30T10:00:00Z",
+  "updated_at": "2026-07-30T10:00:00Z"
+}
