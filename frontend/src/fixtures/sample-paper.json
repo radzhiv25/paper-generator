@@ -1,0 +1,127 @@
+{
+  "paper": {
+    "paper_id": "paper-fixture-001",
+    "owner_id": "user-demo",
+    "template_id": "cbse",
+    "metadata": {
+      "subject": "Physics",
+      "grade_class": "Class XII",
+      "total_marks": 50,
+      "duration": "3 hours",
+      "instructions": "All questions are compulsory. Show working for numerical problems."
+    },
+    "sections": [
+      {
+        "section_id": "A",
+        "instructions": "Answer all questions. Each question carries 1 mark.",
+        "questions": [
+          {
+            "q_id": "A1",
+            "type": "mcq",
+            "content": [
+              { "type": "text", "value": "The SI unit of electric current is:" }
+            ],
+            "options": ["Volt", "Ampere", "Ohm", "Coulomb"],
+            "marks": 1,
+            "difficulty": "easy"
+          },
+          {
+            "q_id": "A2",
+            "type": "mcq",
+            "content": [
+              { "type": "text", "value": "According to Einstein's mass-energy equivalence, " },
+              { "type": "equation", "value": "E = mc^2" },
+              { "type": "text", "value": ", energy is proportional to:" }
+            ],
+            "options": ["Mass only", "Speed of light only", "Mass and speed of light", "Neither"],
+            "marks": 1,
+            "difficulty": "medium"
+          }
+        ]
+      },
+      {
+        "section_id": "B",
+        "instructions": "Answer any 3 of the following. Each question carries 5 marks.",
+        "questions": [
+          {
+            "q_id": "B1",
+            "type": "numerical",
+            "content": [
+              { "type": "text", "value": "A body of mass 2 kg is accelerated at " },
+              { "type": "equation", "value": "5\\,\\text{m/s}^2" },
+              { "type": "text", "value": ". Calculate the force applied using " },
+              { "type": "equation", "value": "F = ma" },
+              { "type": "text", "value": "." }
+            ],
+            "marks": 5,
+            "difficulty": "medium"
+          },
+          {
+            "q_id": "B2",
+            "type": "long",
+            "content": [
+              { "type": "text", "value": "Derive the expression for kinetic energy of a body of mass " },
+              { "type": "equation", "value": "m" },
+              { "type": "text", "value": " moving with velocity " },
+              { "type": "equation", "value": "v" },
+              { "type": "text", "value": ". Show that " },
+              { "type": "equation", "value": "KE = \\frac{1}{2}mv^2" },
+              { "type": "text", "value": "." }
+            ],
+            "marks": 5,
+            "difficulty": "hard"
+          },
+          {
+            "q_id": "B3",
+            "type": "short",
+            "content": [
+              { "type": "text", "value": "State Ohm's law and write the chemical formula for water as " },
+              { "type": "chem_notation", "value": "H₂O" },
+              { "type": "text", "value": "." }
+            ],
+            "marks": 5,
+            "difficulty": "easy"
+          }
+        ]
+      }
+    ],
+    "created_at": "2026-07-30T08:00:00.000Z",
+    "updated_at": "2026-07-30T08:00:00.000Z"
+  },
+  "answer_key": {
+    "paper_id": "paper-fixture-001",
+    "answers": [
+      {
+        "q_id": "A1",
+        "answer": [{ "type": "text", "value": "Ampere" }],
+        "explanation": "Electric current is measured in amperes (A)."
+      },
+      {
+        "q_id": "A2",
+        "answer": [{ "type": "text", "value": "Mass and speed of light" }],
+        "explanation": "E = mc² shows energy depends on both mass and the speed of light squared."
+      },
+      {
+        "q_id": "B1",
+        "answer": [
+          { "type": "text", "value": "Using F = ma: F = 2 × 5 = " },
+          { "type": "equation", "value": "10\\,\\text{N}" }
+        ]
+      },
+      {
+        "q_id": "B2",
+        "answer": [
+          { "type": "text", "value": "Work done W = Fs. From v² = u² + 2as with u=0, s = v²/2a. Substituting F=ma gives " },
+          { "type": "equation", "value": "KE = \\frac{1}{2}mv^2" }
+        ]
+      },
+      {
+        "q_id": "B3",
+        "answer": [
+          { "type": "text", "value": "Ohm's law: V = IR. Water formula: " },
+          { "type": "chem_notation", "value": "H₂O" }
+        ]
+      }
+    ]
+  }
+}
