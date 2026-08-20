@@ -1,121 +1,150 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { Loader2 } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { cn } from '@/lib/utils'
+import { GeneratingOverlay } from './components/DocumentCanvas/GeneratingOverlay'
+import { AuthProvider, useAuth } from './state/AuthContext'
+import { ThemeProvider } from './state/ThemeContext'
+import { PaperProvider, usePaper } from './state/PaperContext'
+import type { AppView } from './state/types'
+import { Sidebar } from './components/Sidebar/Sidebar'
+import { Dashboard } from './components/Sidebar/Dashboard'
+import { TemplatesList } from './components/Sidebar/TemplatesList'
+import { RecentPapers } from './components/Sidebar/RecentPapers'
+import { SettingsPanel } from './components/Sidebar/SettingsPanel'
+import { DocumentCanvas } from './components/DocumentCanvas/DocumentCanvas'
+import { AnswerKeyEditor } from './components/AnswerKey/AnswerKeyEditor'
+import { PromptPanel } from './components/PromptPanel/PromptPanel'
+import { ExportBar } from './components/ExportBar/ExportBar'
+import { AuthScreen } from './components/Auth/AuthScreen'
+import { RequireAuth } from './components/Auth/RequireAuth'
+import { LandingPage } from './components/Landing/LandingPage'
 
-function App() {
-  const [count, setCount] = useState(0)
+function EditorWorkspace() {
+  const { paper, loading, viewMode, generating, llmInfo, generationPhase, generationElapsed } =
+    usePaper()
+
+  if (loading || !paper) {
+    return (
+      <div className="flex flex-1 items-center justify-center gap-2 text-sm text-muted-foreground">
+        {loading && <Loader2 className="size-4 animate-spin" />}
+        {loading ? 'Loading paper…' : 'No paper selected'}
+      </div>
+    )
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="flex min-w-0 flex-1 flex-col">
+      <div className="relative flex-1 overflow-hidden">
+        <div className={cn('h-full', viewMode !== 'paper' && 'hidden')}>
+          <DocumentCanvas key={paper.paper_id} paper={paper} />
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+        {viewMode === 'answer_key' && <AnswerKeyEditor />}
+        {generating && (
+          <GeneratingOverlay
+            modelName={llmInfo?.llm_model}
+            provider={llmInfo?.llm_provider}
+            phase={generationPhase ?? undefined}
+            serverElapsed={generationElapsed}
+          />
+        )}
+      </div>
+      <ExportBar />
+    </div>
+  )
+}
 
-      <div className="ticks"></div>
+function AppShell() {
+  const { loadPaper } = usePaper()
+  const [activeView, setActiveView] = useState<AppView>('home')
+  const [showEditor, setShowEditor] = useState(false)
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+  const openPaper = useCallback(
+    async (paperId: string) => {
+      await loadPaper(paperId)
+      setShowEditor(true)
+      setActiveView('editor')
+    },
+    [loadPaper],
+  )
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+  return (
+    <div className="flex h-full">
+      <Sidebar
+        activeView={showEditor ? 'editor' : activeView}
+        onNavigate={(view) => {
+          if (view !== 'editor') {
+            setShowEditor(false)
+            setActiveView(view)
+          }
+        }}
+      />
+
+      {showEditor ? (
+        <div className="flex min-w-0 flex-1">
+          <EditorWorkspace />
+          <PromptPanel />
+        </div>
+      ) : (
+        <main className="flex-1 overflow-hidden bg-surface">
+          {activeView === 'home' && (
+            <Dashboard
+              onOpenPaper={(id) => void openPaper(id)}
+              onNewPaper={(id) => void openPaper(id)}
+            />
+          )}
+          {activeView === 'templates' && (
+            <TemplatesList onSelectTemplate={(id) => void openPaper(id)} />
+          )}
+          {activeView === 'recent' && (
+            <RecentPapers onOpenPaper={(id) => void openPaper(id)} />
+          )}
+          {activeView === 'settings' && <SettingsPanel />}
+        </main>
+      )}
+    </div>
+  )
+}
+
+function AppRoutes() {
+  const { loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="size-5 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/auth" element={<AuthScreen />} />
+      <Route
+        path="/app"
+        element={
+          <RequireAuth>
+            <PaperProvider>
+              <AppShell />
+            </PaperProvider>
+          </RequireAuth>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   )
 }
 
