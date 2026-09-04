@@ -15,6 +15,7 @@ export interface QuestionAttributes {
   marks: number
   difficulty: Difficulty
   options: string[]
+  subQuestions: Array<{ sq_id: string; marks: number; content: Array<{ type: string; value: string }> }>
 }
 
 function emptyQuestionNode(qId: string) {
@@ -56,6 +57,7 @@ export const QuestionNode = Node.create({
       marks: { default: 1 },
       difficulty: { default: 'medium' },
       options: { default: [] },
+      subQuestions: { default: [] },
     }
   },
 

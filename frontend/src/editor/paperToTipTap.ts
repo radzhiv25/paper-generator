@@ -30,10 +30,20 @@ function sectionToNode(section: Section): JSONContent {
 }
 
 function questionToNode(question: Question): JSONContent {
-  const bodyContent =
+  const mainContent =
     question.body_doc?.length
       ? question.body_doc
       : [{ type: 'paragraph', content: contentBlocksToInline(question.content) }]
+
+  // Append sub-question paragraphs as readable content inside the node
+  const subContent: JSONContent[] = (question.sub_questions ?? []).map((sq) => ({
+    type: 'paragraph',
+    content: [
+      { type: 'text', text: `(${sq.sq_id}) `, marks: [{ type: 'bold' }] },
+      ...contentBlocksToInline(sq.content),
+      { type: 'text', text: `  [${sq.marks} mark${sq.marks === 1 ? '' : 's'}]`, marks: [{ type: 'italic' }] },
+    ],
+  }))
 
   return {
     type: 'question',
@@ -43,8 +53,9 @@ function questionToNode(question: Question): JSONContent {
       marks: question.marks,
       difficulty: question.difficulty,
       options: question.options ?? [],
+      subQuestions: question.sub_questions ?? [],
     },
-    content: bodyContent,
+    content: [...mainContent, ...subContent],
   }
 }
 

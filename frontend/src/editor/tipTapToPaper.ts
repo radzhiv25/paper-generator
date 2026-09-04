@@ -54,6 +54,7 @@ function questionFromNode(node: JSONContent): Question {
     options: (node.attrs?.options as string[]) ?? undefined,
     content: questionBodyBlocks(node),
     body_doc: bodyDoc,
+    sub_questions: (node.attrs?.subQuestions as Question['sub_questions']) ?? undefined,
   }
 }
 

@@ -11,6 +11,12 @@ export interface ContentBlock {
   value: string
 }
 
+export interface SubQuestion {
+  sq_id: string  // "a", "b", "c"
+  content: ContentBlock[]
+  marks: number
+}
+
 export interface Question {
   q_id: string
   type: QuestionType
@@ -21,6 +27,7 @@ export interface Question {
   marks: number
   difficulty: Difficulty
   source_chunk_id?: string
+  sub_questions?: SubQuestion[]
 }
 
 export interface Section {
@@ -113,7 +120,13 @@ export interface CostEstimate {
 export function sumMarks(paper: Paper): number {
   return paper.sections.reduce(
     (total, section) =>
-      total + section.questions.reduce((s, q) => s + q.marks, 0),
+      total +
+      section.questions.reduce((s, q) => {
+        if (q.sub_questions?.length) {
+          return s + q.sub_questions.reduce((sq, sub) => sq + sub.marks, 0)
+        }
+        return s + q.marks
+      }, 0),
     0,
   )
 }
