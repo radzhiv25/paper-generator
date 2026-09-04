@@ -1,5 +1,6 @@
 import type { NodeViewProps } from '@tiptap/react'
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
+import katex from 'katex'
 import {
   ChevronDown,
   ChevronUp,
@@ -39,6 +40,20 @@ function stopEditorMouseDown(e: React.MouseEvent) {
   e.stopPropagation()
 }
 
+/** Render an option string — use KaTeX if it contains math/chem notation */
+function renderOption(opt: string): React.ReactNode {
+  if (/[_^{}\\]/.test(opt)) {
+    try {
+      const html = katex.renderToString(opt, { throwOnError: false, displayMode: false })
+      // eslint-disable-next-line react/no-danger
+      return <span dangerouslySetInnerHTML={{ __html: html }} />
+    } catch {
+      // fall through to plain text
+    }
+  }
+  return opt
+}
+
 function emitAiEdit(qId: string) {
   window.dispatchEvent(new CustomEvent('paper:ai-edit-question', { detail: { qId } }))
 }
@@ -55,6 +70,7 @@ export function QuestionNodeView({
   const marks = Number(node.attrs.marks) || 0
   const difficulty = node.attrs.difficulty as Difficulty
   const options = (node.attrs.options as string[]) ?? []
+  const subQuestions = (node.attrs.subQuestions as Array<{ sq_id: string; marks: number }>) ?? []
 
   const pos = typeof getPos === 'function' ? getPos() : null
 
@@ -105,7 +121,7 @@ export function QuestionNodeView({
             id={`marks-${qId}`}
             type="number"
             min={0}
-            className="question-chrome-input w-12"
+            className="question-chrome-input w-12 !bg-white !text-gray-800"
             value={marks}
             onChange={(e) => updateAttributes({ marks: Number(e.target.value) || 0 })}
           />
@@ -119,7 +135,7 @@ export function QuestionNodeView({
           >
             <SelectTrigger
               size="sm"
-              className="question-chrome-select h-6 w-[5.5rem] gap-1 px-2 text-[11px] font-normal"
+              className="question-chrome-select h-6 w-[5.5rem] gap-1 px-2 text-[11px] font-normal !bg-white !text-gray-800 dark:!bg-white dark:!text-gray-800"
               onMouseDown={stopEditorMouseDown}
             >
               <SelectValue />
@@ -141,7 +157,7 @@ export function QuestionNodeView({
           >
             <SelectTrigger
               size="sm"
-              className="question-chrome-select h-6 w-[5.25rem] gap-1 px-2 text-[11px] font-normal"
+              className="question-chrome-select h-6 w-[5.25rem] gap-1 px-2 text-[11px] font-normal !bg-white !text-gray-800 dark:!bg-white dark:!text-gray-800"
               onMouseDown={stopEditorMouseDown}
             >
               <SelectValue />
@@ -192,9 +208,21 @@ export function QuestionNodeView({
       {options.length > 0 && (
         <ul className="mcq-options mt-2 ml-6 list-disc text-sm" contentEditable={false}>
           {options.map((opt) => (
-            <li key={opt}>{opt}</li>
+            <li key={opt}>{renderOption(opt)}</li>
           ))}
         </ul>
+      )}
+      {subQuestions.length > 0 && (
+        <div className="mt-1.5 flex flex-wrap gap-1" contentEditable={false}>
+          {subQuestions.map((sq) => (
+            <span
+              key={sq.sq_id}
+              className="inline-flex items-center gap-1 rounded bg-brand-50 px-1.5 py-0.5 text-[10px] font-medium text-brand-700 dark:bg-brand-950/40 dark:text-brand-300"
+            >
+              ({sq.sq_id}) {sq.marks}mk
+            </span>
+          ))}
+        </div>
       )}
     </NodeViewWrapper>
   )

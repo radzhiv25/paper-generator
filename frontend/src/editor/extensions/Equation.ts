@@ -67,9 +67,25 @@ export const ChemNotationNode = Node.create({
       'span',
       mergeAttributes({
         'data-type': 'chem-notation',
-        class: 'chem-notation font-mono',
+        class: 'chem-notation',
       }),
       node.attrs.value,
     ]
+  },
+
+  addNodeView() {
+    return ({ node }) => {
+      const dom = document.createElement('span')
+      dom.className = 'chem-notation'
+      dom.setAttribute('data-type', 'chem-notation')
+      dom.contentEditable = 'false'
+      try {
+        // Render chemical notation as inline math (subscripts/superscripts work naturally)
+        katex.render(node.attrs.value, dom, { throwOnError: false, displayMode: false })
+      } catch {
+        dom.textContent = node.attrs.value
+      }
+      return { dom }
+    }
   },
 })
