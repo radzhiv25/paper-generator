@@ -23,6 +23,7 @@ import {
 import type { ContextDocumentSummary, CostEstimate } from '../../editor/schema'
 import { paperHasWrittenContent } from '../../editor/paperIds'
 import { formatCost, formatTokens } from '../../lib/costEstimate'
+import { getByokModel } from '../../lib/settings'
 import { usePaper } from '../../state/PaperContext'
 
 function modelLabel(llmInfo: { llm_provider: string; llm_model?: string } | null): string {
@@ -30,7 +31,10 @@ function modelLabel(llmInfo: { llm_provider: string; llm_model?: string } | null
   if (llmInfo.llm_provider === 'local') {
     return `Ollama · ${llmInfo.llm_model ?? 'local model'}`
   }
-  if (llmInfo.llm_provider === 'byok') return 'Bring Your Own Key'
+  if (llmInfo.llm_provider === 'byok') {
+    const m = getByokModel()
+    return m ? `BYOK · ${m}` : 'Bring Your Own Key'
+  }
   return llmInfo.llm_model || llmInfo.llm_provider
 }
 
@@ -197,7 +201,7 @@ export function PromptPanel() {
             )}
           </div>
           {activeDoc && (
-            <p className="flex items-center gap-1 text-xs text-green-700">
+            <p className="flex items-center gap-1 text-xs text-green-700 dark:text-green-400">
               <CheckCircle2 className="size-3" />
               In use: {activeDoc.filename}
               {activeDoc.chunk_count > 0 ? ` · ${activeDoc.chunk_count} chunks` : ''}
@@ -229,9 +233,14 @@ export function PromptPanel() {
                 <Cpu className="size-3" />
                 {displayEstimate.model}
               </p>
-              {llmInfo?.llm_provider === 'byok' && (
+              {llmInfo?.llm_provider === 'byok' && !getByokModel() && (
                 <p className="mt-1 text-amber-600">
-                  Add your API key in Settings for BYOK generation.
+                  No model selected — pick one in Settings.
+                </p>
+              )}
+              {llmInfo?.llm_provider === 'byok' && getByokModel() && (
+                <p className="mt-1 text-emerald-600 dark:text-emerald-400">
+                  Ready · {getByokModel()}
                 </p>
               )}
               {llmInfo?.llm_provider === 'local' && (
@@ -262,9 +271,9 @@ export function PromptPanel() {
         )}
 
         {questionCount > 0 && !generating && (
-          <Alert className="mt-3 border-amber-200 bg-amber-50">
-            <AlertTriangle className="text-amber-600" />
-            <AlertDescription className="text-xs text-amber-900">
+          <Alert className="mt-3 border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40">
+            <AlertTriangle className="text-amber-600 dark:text-amber-400" />
+            <AlertDescription className="text-xs text-amber-900 dark:text-amber-200">
               This paper has {questionCount} question{questionCount === 1 ? '' : 's'}.
               Generating again will <strong>replace the entire paper</strong> and answer key.
               Use ⌘K on a selected question for a single-question AI edit instead.
@@ -273,8 +282,8 @@ export function PromptPanel() {
         )}
 
         {marksMismatch && (
-          <Alert className="mt-3 border-amber-200 bg-amber-50 text-amber-800">
-            <AlertTriangle className="text-amber-600" />
+          <Alert className="mt-3 border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+            <AlertTriangle className="text-amber-600 dark:text-amber-400" />
             <AlertDescription>
               Question marks don&apos;t sum to total marks ({paper.metadata.total_marks}).
             </AlertDescription>
@@ -282,7 +291,7 @@ export function PromptPanel() {
         )}
       </div>
 
-      <div className="h-9 shrink-0 border-t border-border bg-white" aria-hidden />
+      <div className="h-9 shrink-0 border-t border-border bg-panel" aria-hidden />
 
       <div className="shrink-0 border-t border-border px-4 py-3">
         <Button

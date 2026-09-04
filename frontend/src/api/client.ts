@@ -1,4 +1,4 @@
-import { getByokApiKey, resolveByokBaseUrl } from '../lib/settings'
+import { getByokApiKey, getByokModel, resolveByokBaseUrl } from '../lib/settings'
 import { getApiBase } from './config'
 
 export class ApiError extends Error {
@@ -56,6 +56,8 @@ function applyByokHeaders(headers: Headers, path: string): void {
   if (baseUrl) {
     headers.set('X-BYOK-Base-URL', baseUrl)
   }
+  const model = getByokModel()
+  if (model) headers.set('X-BYOK-Model', model)
 }
 
 export async function apiFetch<T>(

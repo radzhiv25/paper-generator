@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, KeyRound } from 'lucide-react'
+import { Check, CheckCircle2, KeyRound, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,13 +16,35 @@ import {
   clearByokBaseUrl,
   getByokApiKey,
   getByokBaseUrl,
+  getByokModel,
   getByokProvider,
   setByokApiKey,
   setByokBaseUrl,
+  setByokModel,
   setByokProvider,
   type ByokProvider,
 } from '../../lib/settings'
 import { isSupabaseConfigured } from '../../lib/supabase'
+
+// Models curated for CBSE paper generation quality
+const PROVIDER_MODEL_PRESETS: Record<ByokProvider, { id: string; label: string; note?: string }[]> = {
+  openrouter: [
+    { id: 'openai/gpt-4o-mini', label: 'GPT-4o mini', note: 'Best value' },
+    { id: 'openai/gpt-4o', label: 'GPT-4o', note: 'Best quality' },
+    { id: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet' },
+    { id: 'anthropic/claude-3-haiku-20240307', label: 'Claude 3 Haiku', note: 'Fast & cheap' },
+    { id: 'google/gemini-flash-1.5', label: 'Gemini Flash 1.5', note: 'Cheapest' },
+  ],
+  openai: [
+    { id: 'gpt-4o-mini', label: 'GPT-4o mini', note: 'Best value' },
+    { id: 'gpt-4o', label: 'GPT-4o', note: 'Best quality' },
+  ],
+  anthropic: [
+    { id: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet', note: 'Best quality' },
+    { id: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku', note: 'Fast & cheap' },
+  ],
+  custom: [],
+}
 
 export function SettingsPanel() {
   const [apiKey, setApiKey] = useState(getByokApiKey() ?? '')
@@ -30,7 +52,14 @@ export function SettingsPanel() {
   const [customBaseUrl, setCustomBaseUrl] = useState(
     getByokBaseUrl() ?? 'http://localhost:11434/v1',
   )
+  const [byokModel, setByokModelState] = useState(getByokModel())
   const [saved, setSaved] = useState(false)
+  // Track what's actually persisted in localStorage (source of truth)
+  const [savedKey, setSavedKey] = useState(getByokApiKey() ?? '')
+  const [savedModel, setSavedModel] = useState(getByokModel())
+
+  const keyIsSaved = savedKey.trim().length > 0
+  const hasPendingChanges = apiKey.trim() !== savedKey.trim() || byokModel.trim() !== savedModel.trim()
 
   const handleSave = () => {
     if (apiKey.trim()) {
@@ -44,6 +73,9 @@ export function SettingsPanel() {
     } else {
       clearByokBaseUrl()
     }
+    setByokModel(byokModel.trim())
+    setSavedKey(apiKey.trim())
+    setSavedModel(byokModel.trim())
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -100,7 +132,20 @@ export function SettingsPanel() {
           )}
 
           <div className="mt-4 space-y-2">
-            <Label htmlFor="api-key">API Key</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="api-key">API Key</Label>
+              {keyIsSaved ? (
+                <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 className="size-3.5" />
+                  Key saved · {savedKey.slice(0, 8)}…
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <XCircle className="size-3.5" />
+                  No key saved
+                </span>
+              )}
+            </div>
             <Input
               id="api-key"
               type="password"
@@ -117,10 +162,52 @@ export function SettingsPanel() {
             />
           </div>
 
-          <Button type="button" onClick={handleSave} className="mt-4">
-            {saved ? <Check /> : <KeyRound />}
-            {saved ? 'Saved!' : 'Save API Key'}
-          </Button>
+          <div className="mt-4 space-y-2">
+            <Label htmlFor="byok-model">Model</Label>
+            <Input
+              id="byok-model"
+              type="text"
+              value={byokModel}
+              onChange={(e) => setByokModelState(e.target.value)}
+              placeholder="e.g. openai/gpt-4o"
+              className="font-mono"
+            />
+            {PROVIDER_MODEL_PRESETS[provider]?.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {PROVIDER_MODEL_PRESETS[provider].map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => setByokModelState(preset.id)}
+                    className={`flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors hover:border-brand-400 hover:bg-brand-50 hover:text-brand-700 dark:hover:bg-brand-950/40 dark:hover:text-brand-300 ${
+                      byokModel === preset.id
+                        ? 'border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-950/40 dark:text-brand-300'
+                        : 'border-border bg-muted text-muted-foreground'
+                    }`}
+                  >
+                    <span className="font-medium">{preset.label}</span>
+                    {preset.note && (
+                      <span className="rounded bg-background px-1 text-[10px] text-muted-foreground">
+                        {preset.note}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-4 flex items-center gap-3">
+            <Button type="button" onClick={handleSave}>
+              {saved ? <Check /> : <KeyRound />}
+              {saved ? 'Saved!' : 'Save'}
+            </Button>
+            {hasPendingChanges && !saved && (
+              <span className="text-xs text-amber-600 dark:text-amber-400">
+                Unsaved changes
+              </span>
+            )}
+          </div>
         </section>
 
         <Separator className="my-10" />

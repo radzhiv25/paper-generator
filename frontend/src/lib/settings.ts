@@ -54,3 +54,7 @@ export function resolveByokBaseUrl(): string | null {
 export function hasByokKey(): boolean {
   return Boolean(getByokApiKey())
 }
+
+const BYOK_MODEL_KEY = 'paper-generator-byok-model'
+export function getByokModel(): string { return localStorage.getItem(BYOK_MODEL_KEY) ?? '' }
+export function setByokModel(v: string): void { localStorage.setItem(BYOK_MODEL_KEY, v) }
