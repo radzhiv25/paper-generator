@@ -1,8 +1,7 @@
 import { Loader2 } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { GeneratingOverlay } from './components/DocumentCanvas/GeneratingOverlay'
 import { AuthProvider, useAuth } from './state/AuthContext'
 import { ThemeProvider } from './state/ThemeContext'
 import { PaperProvider, usePaper } from './state/PaperContext'
@@ -21,8 +20,7 @@ import { RequireAuth } from './components/Auth/RequireAuth'
 import { LandingPage } from './components/Landing/LandingPage'
 
 function EditorWorkspace() {
-  const { paper, loading, viewMode, generating, llmInfo, generationPhase, generationElapsed } =
-    usePaper()
+  const { paper, loading, viewMode, generating } = usePaper()
 
   if (loading || !paper) {
     return (
@@ -41,18 +39,20 @@ function EditorWorkspace() {
         </div>
         {viewMode === 'answer_key' && <AnswerKeyEditor />}
         {generating && (
-          <GeneratingOverlay
-            modelName={llmInfo?.llm_model}
-            provider={llmInfo?.llm_provider}
-            phase={generationPhase ?? undefined}
-            serverElapsed={generationElapsed}
-          />
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <Loader2 className="size-4 animate-spin" />
+              Generating paper…
+            </div>
+          </div>
         )}
       </div>
       <ExportBar />
     </div>
   )
 }
+
+const LAST_PAPER_KEY = 'paper-generator-last-paper'
 
 function AppShell() {
   const { loadPaper } = usePaper()
@@ -62,11 +62,23 @@ function AppShell() {
   const openPaper = useCallback(
     async (paperId: string) => {
       await loadPaper(paperId)
+      localStorage.setItem(LAST_PAPER_KEY, paperId)
       setShowEditor(true)
       setActiveView('editor')
     },
     [loadPaper],
   )
+
+  // Restore last open paper on mount
+  useEffect(() => {
+    const lastId = localStorage.getItem(LAST_PAPER_KEY)
+    if (lastId) {
+      openPaper(lastId).catch(() => {
+        localStorage.removeItem(LAST_PAPER_KEY)
+      })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="flex h-full">
@@ -76,6 +88,7 @@ function AppShell() {
           if (view !== 'editor') {
             setShowEditor(false)
             setActiveView(view)
+            localStorage.removeItem(LAST_PAPER_KEY)
           }
         }}
       />
