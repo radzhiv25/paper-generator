@@ -79,7 +79,7 @@ function MockSidebar() {
               className={cn(
                 'flex items-center gap-2 rounded-md px-2 py-1.5 text-xs',
                 item.active
-                  ? 'bg-brand-50 font-medium text-brand-700'
+                  ? 'bg-brand-50 font-medium text-brand-700 dark:bg-brand-950/50 dark:text-brand-300'
                   : 'text-muted-foreground',
               )}
             >
@@ -102,7 +102,7 @@ function MockSidebar() {
 function MockToolbar() {
   const icons = [Plus, Bold, Italic, Underline, AlignLeft, Type]
   return (
-    <div className="flex items-center gap-1 border-b border-border bg-[#fafbfc] px-2 py-1">
+    <div className="flex items-center gap-1 border-b border-border bg-[#fafbfc] px-2 py-1 dark:bg-muted/30">
       {icons.map((Icon, i) => (
         <div
           key={i}
@@ -123,9 +123,9 @@ function MockDocumentView() {
   const sectionB = previewPaper.sections[1]
 
   return (
-    <div className="flex h-full flex-col bg-[#e8eaed]">
-      <div className="border-b border-border bg-white px-4 py-2">
-        <p className="truncate text-sm font-normal text-[#202124]">{previewPaper.metadata.subject}</p>
+    <div className="flex h-full flex-col bg-[#e8eaed] dark:bg-[#1a1c1f]">
+      <div className="border-b border-border bg-white px-4 py-2 dark:bg-card">
+        <p className="truncate text-sm font-normal text-[#202124] dark:text-foreground">{previewPaper.metadata.subject}</p>
         <p className="text-[10px] text-muted-foreground">
           {previewPaper.metadata.grade_class} · {previewPaper.metadata.total_marks} marks ·{' '}
           {previewPaper.metadata.duration}
@@ -186,7 +186,7 @@ function MockDocumentView() {
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-between border-t border-border bg-white px-3 py-1 text-[10px] text-muted-foreground">
+      <div className="flex items-center justify-between border-t border-border bg-white px-3 py-1 text-[10px] text-muted-foreground dark:bg-card">
         <span>248 words · 5 questions</span>
         <span className="text-brand-600">A2 selected · ⌘K to AI-edit</span>
       </div>
@@ -205,7 +205,7 @@ function MockAnswerKeyView() {
       </div>
       <div className="flex-1 space-y-3 overflow-auto p-4">
         {answers.map((entry) => (
-          <div key={entry.q_id} className="rounded-xl border border-border bg-white p-3 shadow-sm">
+          <div key={entry.q_id} className="rounded-xl border border-border bg-white p-3 shadow-sm dark:bg-card">
             <div className="mb-2 flex items-center gap-2">
               <Badge variant="secondary" className="text-[10px]">
                 {entry.q_id}
@@ -252,7 +252,7 @@ function MockPromptPanel({ highlighted }: { highlighted: boolean }) {
           <div className="rounded-md border border-border bg-background px-2 py-1.5 text-[10px]">
             {previewContextDoc.filename}
           </div>
-          <p className="mt-1 flex items-center gap-1 text-[10px] text-green-700">
+          <p className="mt-1 flex items-center gap-1 text-[10px] text-green-700 dark:text-green-400">
             <Check className="size-3" />
             {previewContextDoc.chunk_count} chunks indexed
           </p>
@@ -321,7 +321,7 @@ export function LandingAppPreview({ compact = false }: { compact?: boolean }) {
                 'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
                 tab === item.id
                   ? 'border-brand-600 bg-brand-600 text-white shadow-sm'
-                  : 'border-border bg-white/80 text-muted-foreground hover:border-brand-300 hover:text-foreground',
+                  : 'border-border bg-white/80 text-muted-foreground hover:border-brand-300 hover:text-foreground dark:bg-card/50',
               )}
             >
               {item.label}

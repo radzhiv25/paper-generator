@@ -27,7 +27,7 @@ export function DocumentStatusBar({
   const chars = text.length
 
   return (
-    <footer className="doc-status-bar flex h-9 shrink-0 items-center justify-between border-t border-border bg-white px-4 text-xs text-muted-foreground">
+    <footer className="doc-status-bar flex h-9 shrink-0 items-center justify-between border-t border-border bg-white px-4 text-xs text-muted-foreground dark:bg-[#1e1f23]">
       <div className="flex items-center gap-3">
         <span>
           {words} word{words === 1 ? '' : 's'}

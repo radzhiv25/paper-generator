@@ -16,7 +16,7 @@ export function DocumentHeader({ paper, saving, onMetadataChange }: DocumentHead
   const [detailsOpen, setDetailsOpen] = useState(false)
 
   return (
-    <header className="doc-header shrink-0 bg-white">
+    <header className="doc-header shrink-0 bg-white dark:bg-[#1e1f23]">
       <div className="flex h-14 items-center gap-3 border-b border-border px-4">
         <div className="min-w-0 flex-1">
           <input
@@ -24,7 +24,7 @@ export function DocumentHeader({ paper, saving, onMetadataChange }: DocumentHead
             value={paper.metadata.subject}
             onChange={(e) => onMetadataChange('subject', e.target.value)}
             placeholder="Untitled paper"
-            className="doc-title-input w-full truncate bg-transparent text-lg font-normal text-[#202124] outline-none placeholder:text-muted-foreground"
+            className="doc-title-input w-full truncate bg-transparent text-lg font-normal text-[#202124] outline-none placeholder:text-muted-foreground dark:text-foreground"
             aria-label="Document title"
           />
           <p className="mt-0.5 text-xs text-muted-foreground">
@@ -43,7 +43,7 @@ export function DocumentHeader({ paper, saving, onMetadataChange }: DocumentHead
               </>
             ) : (
               <>
-                <Check className="size-3 text-green-600" />
+                <Check className="size-3 text-green-600 dark:text-green-400" />
                 Saved to cloud
               </>
             )}
@@ -66,7 +66,7 @@ export function DocumentHeader({ paper, saving, onMetadataChange }: DocumentHead
       </div>
 
       {detailsOpen && (
-        <div className="border-t border-border bg-[#fafbfc] px-4 py-3">
+        <div className="border-t border-border bg-[#fafbfc] px-4 py-3 dark:bg-[#1e1f23]">
           <div className="flex flex-wrap items-end gap-4">
             <div className="space-y-1">
               <Label htmlFor="meta-class" className="text-xs text-muted-foreground">

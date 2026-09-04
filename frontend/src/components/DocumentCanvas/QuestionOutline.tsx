@@ -31,7 +31,7 @@ export function QuestionOutline({ editor, selectedQId, onSelect, onAiEdit }: Que
   if (items.length === 0) return null
 
   return (
-    <aside className="question-outline hidden w-40 shrink-0 flex-col overflow-hidden border-r border-border bg-white/90 xl:flex">
+    <aside className="question-outline hidden w-40 shrink-0 flex-col overflow-hidden border-r border-border bg-white/90 xl:flex dark:bg-[#1e1f23]">
       <div className="flex-1 overflow-auto p-2 text-xs">
       <p className="mb-2 px-1 font-semibold uppercase tracking-wide text-muted-foreground">Questions</p>
       <ul className="space-y-0.5">

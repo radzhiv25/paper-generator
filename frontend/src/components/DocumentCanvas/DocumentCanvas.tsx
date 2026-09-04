@@ -291,7 +291,7 @@ export function DocumentCanvas({ paper }: DocumentCanvasProps) {
   }, [editor])
 
   return (
-    <div className="flex h-full flex-col bg-[#e8eaed]">
+    <div className="flex h-full flex-col bg-[#e8eaed] dark:bg-[#1c1d21]">
       <DocumentHeader
         paper={paper}
         saving={saving}

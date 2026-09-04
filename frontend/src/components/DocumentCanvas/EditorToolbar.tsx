@@ -215,7 +215,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
   }
 
   return (
-    <div className="doc-toolbar flex h-10 shrink-0 items-center border-b border-border bg-[#fafbfc] px-2 dark:bg-muted/20">
+    <div className="doc-toolbar flex space-x-2 shrink-0 items-center border-b border-border bg-[#fafbfc] px-2 dark:bg-muted/20">
       <ToolbarGroup>
         <ToolbarIconButton
           label="Add question"
@@ -232,7 +232,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         </ToolbarIconButton>
       </ToolbarGroup>
 
-      <Separator orientation="vertical" className="mx-0.5 h-6 shrink-0" />
+      {/* <Separator orientation="vertical" className="mx-0.5 h-6 shrink-0" /> */}
 
       <ToolbarGroup>
         <ToolbarIconButton
@@ -253,7 +253,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         </ToolbarIconButton>
       </ToolbarGroup>
 
-      <Separator orientation="vertical" className="mx-0.5 h-6 shrink-0" />
+      {/* <Separator orientation="vertical" className="mx-0.5 h-6 shrink-0" /> */}
 
       <ToolbarGroup>
         <Tooltip label="Paragraph style">
@@ -344,7 +344,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         </Tooltip>
       </ToolbarGroup>
 
-      <Separator orientation="vertical" className="mx-0.5 h-6 shrink-0" />
+      {/* <Separator orientation="vertical" className="mx-0.5 h-6 shrink-0" /> */}
 
       <ToolbarGroup>
         <ToolbarIconButton
@@ -438,7 +438,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         </ToolbarIconButton>
       </ToolbarGroup>
 
-      <Separator orientation="vertical" className="mx-0.5 h-6 shrink-0" />
+      {/* <Separator orientation="vertical" className="mx-0.5 h-6 shrink-0" /> */}
 
       <ToolbarGroup>
         <ToolbarIconButton
@@ -471,7 +471,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         </ToolbarIconButton>
       </ToolbarGroup>
 
-      <Separator orientation="vertical" className="mx-0.5 h-6 shrink-0" />
+      {/* <Separator orientation="vertical" className="mx-0.5 h-6 shrink-0" /> */}
 
       <ToolbarGroup>
         <ToolbarIconButton
