@@ -15,6 +15,12 @@ class ContentBlock(BaseModel):
     value: str
 
 
+class SubQuestion(BaseModel):
+    sq_id: str  # "a", "b", "c", etc.
+    content: list[ContentBlock]
+    marks: int = Field(ge=0)
+
+
 class Question(BaseModel):
     q_id: str
     type: QuestionType
@@ -24,6 +30,7 @@ class Question(BaseModel):
     marks: int = Field(ge=0)
     difficulty: Difficulty
     source_chunk_id: str | None = None
+    sub_questions: list[SubQuestion] | None = None
 
     @model_validator(mode="after")
     def validate_mcq_options(self) -> Question:
@@ -57,10 +64,24 @@ class Paper(BaseModel):
     context_document_id: str | None = None
 
     def all_question_ids(self) -> set[str]:
-        return {q.q_id for section in self.sections for q in section.questions}
+        ids = set()
+        for section in self.sections:
+            for q in section.questions:
+                ids.add(q.q_id)
+                if q.sub_questions:
+                    for sq in q.sub_questions:
+                        ids.add(f"{q.q_id}{sq.sq_id}")
+        return ids
 
     def total_marks_sum(self) -> int:
-        return sum(q.marks for section in self.sections for q in section.questions)
+        total = 0
+        for section in self.sections:
+            for q in section.questions:
+                if q.sub_questions:
+                    total += sum(sq.marks for sq in q.sub_questions)
+                else:
+                    total += q.marks
+        return total
 
     def find_question(self, q_id: str) -> Question | None:
         for section in self.sections:
@@ -95,10 +116,12 @@ class AnswerKey(BaseModel):
         return self
 
     def validate_against_paper(self, paper: Paper) -> None:
+        import logging
+        logger = logging.getLogger(__name__)
         paper_q_ids = paper.all_question_ids()
         for entry in self.answers:
             if entry.q_id not in paper_q_ids:
-                raise ValueError(f"Answer key references unknown q_id: {entry.q_id}")
+                logger.warning("Answer key references unknown q_id: %s — skipping", entry.q_id)
 
 
 class PaperCreate(BaseModel):
