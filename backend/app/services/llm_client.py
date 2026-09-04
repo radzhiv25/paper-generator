@@ -118,47 +118,88 @@ class LocalOllamaClient:
         self.base_url = settings.ollama_base_url.rstrip("/")
         self.model = settings.ollama_model
 
+    @property
+    def _is_ollama(self) -> bool:
+        return "localhost" in self.base_url or "127.0.0.1" in self.base_url
+
+    @property
+    def _supports_json_mode(self) -> bool:
+        """Only OpenAI-native models reliably support response_format json_object."""
+        model = self.model or ""
+        return model.startswith("openai/") or (self._is_ollama and not model.startswith("anthropic/"))
+
     async def _chat(self, messages: list[dict], api_key: str | None = None) -> str:
-        headers = {}
+        import logging
+        logger = logging.getLogger(__name__)
+        headers = {"Content-Type": "application/json"}
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
+        # OpenRouter recommends these headers for identification
+        if not self._is_ollama:
+            headers["HTTP-Referer"] = "https://papercue.app"
+            headers["X-Title"] = "PaperCue"
+        payload: dict = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": 0.3,
+        }
+        # json_object mode only for models that support it — Claude/Gemini don't
+        if self._supports_json_mode:
+            payload["response_format"] = {"type": "json_object"}
+        # num_predict is Ollama-specific
+        if self._is_ollama:
+            payload["options"] = {"num_predict": 8192}
         async with httpx.AsyncClient(timeout=300.0) as client:
             response = await client.post(
                 f"{self.base_url}/chat/completions",
                 headers=headers,
-                json={
-                    "model": self.model,
-                    "messages": messages,
-                    "temperature": 0.3,
-                    "response_format": {"type": "json_object"},
-                    "options": {"num_predict": 8192},
-                },
+                json=payload,
             )
+            if not response.is_success:
+                logger.error(
+                    "LLM request failed %s | model=%s | body=%s",
+                    response.status_code,
+                    self.model,
+                    response.text[:500],
+                )
             response.raise_for_status()
             return response.json()["choices"][0]["message"]["content"]
 
     def _paper_schema_hint(self) -> str:
         return """
-Return JSON with keys "paper" and "answer_key".
-paper must match:
+OUTPUT FORMAT: Return a single JSON object with exactly two keys: "paper" and "answer_key". No markdown fences, no extra text.
+
+PAPER SCHEMA:
 {
-  "metadata": {"subject": str, "grade_class": str, "total_marks": int, "duration": str, "instructions": str?},
+  "metadata": {"subject": str, "grade_class": str, "total_marks": int, "duration": str, "instructions": str},
   "sections": [{
     "section_id": str,
-    "instructions": str?,
+    "instructions": str,
     "questions": [{
       "q_id": str,
       "type": "mcq"|"short"|"long"|"numerical"|"freeform",
-      "content": [{"type": "text"|"equation"|"chem_notation", "value": str}],
-      "options": [str]?,
+      "content": [ContentBlock],
+      "options": [str],
       "marks": int,
-      "difficulty": "easy"|"medium"|"hard"
+      "difficulty": "easy"|"medium"|"hard",
+      "sub_questions": [{"sq_id": str, "content": [ContentBlock], "marks": int}]
     }]
   }]
 }
-answer_key: {"answers": [{"q_id": str, "answer": [content blocks], "explanation": str?}]}
-Every answer q_id must exist in paper questions.
-Use LaTeX in equation blocks without delimiters.
+
+ContentBlock: {"type": "text"|"equation"|"chem_notation", "value": str}
+
+ANSWER KEY SCHEMA:
+{"answers": [{"q_id": str, "answer": [ContentBlock], "explanation": str}]}
+For sub-questions use q_id like "1a", "1b", "2a" etc.
+
+CONTENT BLOCK RULES:
+- "text": plain prose, question stem, option text
+- "equation": valid LaTeX without delimiters — e.g. "\\frac{d}{dx}(x^n) = nx^{n-1}", "\\vec{F} = m\\vec{a}", "\\int_0^\\infty e^{-x}dx"
+  Physics: \\alpha \\beta \\gamma \\Delta \\theta \\lambda \\mu \\nu \\pi \\rho \\sigma \\omega \\Omega \\vec{v} \\hat{n}
+  Units: "5 \\text{ ms}^{-1}", "9.8 \\text{ m/s}^2"
+- "chem_notation": chemical formulas/equations — e.g. "H_2SO_4", "CaCO_3 \\rightarrow CaO + CO_2"
+  Use \\rightarrow for reactions, \\rightleftharpoons for equilibrium, \\uparrow gas, \\downarrow precipitate
 """
 
     async def generate_paper(
@@ -173,10 +214,26 @@ Use LaTeX in equation blocks without delimiters.
         api_key: str | None = None,
     ) -> tuple[Paper, AnswerKey]:
         context = "\n\n---\n\n".join(context_chunks[:8]) if context_chunks else "No uploaded context."
-        system = (
-            "You are an expert exam paper generator for teachers. "
-            "Output only valid JSON with no markdown fences. " + self._paper_schema_hint()
-        )
+        system = """You are an expert CBSE exam paper generator for Indian school teachers (Classes 9–12).
+
+CBSE PAPER STRUCTURE:
+- Section A: MCQ / Very Short Answer — 1 mark each. MCQs must have exactly 4 options.
+- Section B: Short Answer I — 2 marks each. Direct concept questions.
+- Section C: Short Answer II — 3 marks each. Explanation or derivation.
+- Section D: Long Answer — 5 marks each. Use sub_questions (a)(b)(c) that sum to 5.
+- Section E: Case-based / Source-based — 4–5 marks. Provide a passage in main content, then sub_questions (a)(b)(c).
+- Follow NCERT syllabus strictly. Use standard CBSE question language.
+- Internal choice (OR) in Sections D and E: add a second question of same marks with "OR" as first text block.
+- sub_questions marks must sum to parent question marks.
+
+QUALITY:
+- Factually accurate, NCERT-aligned, no repeated concepts.
+- Difficulty: ~30% easy, ~50% medium, ~20% hard.
+- Numerical questions: state given data, identify formula, solve step by step in answer key.
+- All mathematical expressions MUST use equation content blocks with proper LaTeX.
+- All chemical formulas/equations MUST use chem_notation content blocks.
+
+""" + self._paper_schema_hint()
         metadata_hint = ""
         if paper_metadata:
             metadata_hint = (
@@ -184,10 +241,12 @@ Use LaTeX in equation blocks without delimiters.
                 f"{json.dumps(paper_metadata)}\n"
             )
         user = (
-            f"Template: {json.dumps(template)}\n"
+            f"CBSE Template: {json.dumps(template)}\n"
             f"{metadata_hint}"
-            f"Context:\n{context}\n\n"
-            f"Teacher request: {prompt}"
+            f"Syllabus/Context:\n{context}\n\n"
+            f"Teacher requirement: {prompt}\n\n"
+            "Generate a complete high-quality CBSE paper with answer key. "
+            "Use equation blocks for all math/physics symbols and chem_notation for all chemistry."
         )
         raw = await self._chat(
             [{"role": "system", "content": system}, {"role": "user", "content": user}],
@@ -243,10 +302,14 @@ Use LaTeX in equation blocks without delimiters.
 class BYOKClient(LocalOllamaClient):
     """Uses caller-provided API key against OpenAI-compatible endpoint."""
 
-    def __init__(self, settings: Settings, base_url: str | None = None):
+    BYOK_DEFAULT_MODEL = "openai/gpt-4o-mini"
+
+    def __init__(self, settings: Settings, base_url: str | None = None, model: str | None = None):
         super().__init__(settings)
         if base_url:
             self.base_url = base_url.rstrip("/")
+        # Always override model for BYOK — never fall back to the Ollama model name
+        self.model = model or self.BYOK_DEFAULT_MODEL
 
 
 class ClaudeClient(LocalOllamaClient):
@@ -271,12 +334,13 @@ def get_llm_client(
     force_mock: bool = False,
     byok_api_key: str | None = None,
     byok_base_url: str | None = None,
+    byok_model: str | None = None,
 ) -> LLMClient:
     settings = settings or get_settings()
     if force_mock or settings.use_mock_llm or settings.llm_provider == "mock":
         return MockLLMClient()
     if settings.llm_provider == "byok" and byok_api_key:
-        return BYOKClient(settings, base_url=byok_base_url or "https://api.openai.com/v1")
+        return BYOKClient(settings, base_url=byok_base_url or "https://api.openai.com/v1", model=byok_model or None)
     if settings.llm_provider == "claude" and settings.anthropic_api_key:
         return ClaudeClient(settings)
     return LocalOllamaClient(settings)
