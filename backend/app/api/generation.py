@@ -111,6 +111,7 @@ async def _run_generation(
     user_id: str,
     byok_api_key: str | None,
     byok_base_url: str | None,
+    byok_model: str | None,
 ) -> None:
     db = SessionLocal()
     try:
@@ -135,15 +136,17 @@ async def _run_generation(
             force_mock=use_mock,
             byok_api_key=byok_api_key,
             byok_base_url=byok_base_url,
+            byok_model=byok_model,
         )
         template = _template_dict(template_id)
 
         set_job_phase(paper_id, "llm")
+        actual_model = getattr(client, "model", settings.ollama_model)
         logger.info(
             "Generating paper %s | provider=%s model=%s subject=%s",
             paper_id,
             settings.llm_provider,
-            settings.ollama_model,
+            actual_model,
             paper_metadata.get("subject"),
         )
 
@@ -267,6 +270,7 @@ async def generate_paper(
     user: User = Depends(get_current_user),
     x_byok_api_key: str | None = Header(default=None, alias="X-BYOK-API-Key"),
     x_byok_base_url: str | None = Header(default=None, alias="X-BYOK-Base-URL"),
+    x_byok_model: str | None = Header(default=None, alias="X-BYOK-Model"),
 ):
     record = _get_paper_record(db, paper_id, user)
     settings = get_settings()
@@ -293,6 +297,7 @@ async def generate_paper(
             user.id,
             x_byok_api_key,
             x_byok_base_url,
+            x_byok_model,
         )
     )
     _running_tasks[paper_id] = task
@@ -366,6 +371,7 @@ async def regenerate_question(
     user: User = Depends(get_current_user),
     x_byok_api_key: str | None = Header(default=None, alias="X-BYOK-API-Key"),
     x_byok_base_url: str | None = Header(default=None, alias="X-BYOK-Base-URL"),
+    x_byok_model: str | None = Header(default=None, alias="X-BYOK-Model"),
 ):
     record = _get_paper_record(db, paper_id, user)
     paper = Paper.model_validate(record.data)
@@ -394,6 +400,7 @@ async def regenerate_question(
         force_mock=use_mock,
         byok_api_key=x_byok_api_key,
         byok_base_url=x_byok_base_url,
+        byok_model=x_byok_model,
     )
 
     context_chunks = await _retrieve_context_chunks(
