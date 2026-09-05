@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AlertTriangle, CheckCircle2, Cpu, Loader2, Sparkles } from 'lucide-react'
+import { AlertTriangle, BookOpen, CheckCircle2, Cpu, Loader2, Save, Sparkles } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -41,6 +41,7 @@ function modelLabel(llmInfo: { llm_provider: string; llm_model?: string } | null
 export function PromptPanel() {
   const {
     paper,
+    answerKey,
     generating,
     generateError,
     runGenerate,
@@ -49,6 +50,8 @@ export function PromptPanel() {
     viewMode,
     setViewMode,
     llmInfo,
+    saveAnswerKeyNow,
+    saving,
   } = usePaper()
   const [prompt, setPrompt] = useState('')
   const [estimate, setEstimate] = useState<CostEstimate | null>(null)
@@ -169,7 +172,46 @@ export function PromptPanel() {
         </TabsList>
       </Tabs>
 
-      <div className="flex-1 overflow-auto p-4">
+      {viewMode === 'answer_key' && (
+        <>
+          <div className="flex-1 overflow-auto p-4 space-y-4">
+            <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 space-y-1">
+              <p className="text-xs font-medium">Answer Key</p>
+              <p className="text-xs text-muted-foreground">
+                {answerKey?.answers.length ?? 0} answer{(answerKey?.answers.length ?? 0) === 1 ? '' : 's'} ·{' '}
+                {answerKey?.answers.filter((a) => a.answer.some((b) => b.value.trim())).length ?? 0} filled
+              </p>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 space-y-1">
+              <p className="text-xs font-medium flex items-center gap-1.5">
+                <BookOpen className="size-3" />
+                How to edit
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Edit answers and explanations in the canvas. Click <strong>Save Answers</strong> in the editor or use the button below to save all changes.
+              </p>
+            </div>
+          </div>
+          <div className="shrink-0 border-t border-border px-4 py-3">
+            <Button
+              type="button"
+              onClick={() => void saveAnswerKeyNow()}
+              disabled={saving}
+              className="w-full"
+            >
+              <span className="inline-flex min-w-[8.5rem] items-center justify-center gap-2">
+                {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                {saving ? 'Saving…' : 'Save Answer Key'}
+              </span>
+            </Button>
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              Switch to Paper tab to generate or edit questions.
+            </p>
+          </div>
+        </>
+      )}
+
+      {viewMode === 'paper' && <div className="flex-1 overflow-auto p-4">
         <div className="space-y-2">
           <Label htmlFor="context-library" className="text-xs">
             Syllabus context
@@ -291,9 +333,9 @@ export function PromptPanel() {
         )}
       </div>
 
-      <div className="h-9 shrink-0 border-t border-border bg-panel" aria-hidden />
+      </div>}
 
-      <div className="shrink-0 border-t border-border px-4 py-3">
+      {viewMode === 'paper' && <div className="shrink-0 border-t border-border px-4 py-3">
         <Button
           type="button"
           onClick={requestGenerate}
@@ -312,7 +354,7 @@ export function PromptPanel() {
         <p className="mt-2 text-center text-xs text-muted-foreground">
           ⌘⇧Q new question · ⌘K edit one question with AI
         </p>
-      </div>
+      </div>}
 
       <Dialog open={replaceConfirmOpen} onOpenChange={setReplaceConfirmOpen}>
         <DialogContent className="sm:max-w-md">
